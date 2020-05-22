@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+<div id="app">
+
+    <v-app id="inspire">
+
+    <template>
+        <v-container fluid>
+            <v-row>
+                <v-col cols="12" sm="3">
+                </v-col>
+                <v-col cols="12" sm="3">
+                    <v-text-field label="Nom de la tache" v-model="nomtache"></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="3">
+                    <v-btn depressed large color="primary" dark v-on:click="creertache" >Nouvelle tache</v-btn>
+                </v-col>
+                <v-col cols="12" sm="3">
+                </v-col>
+
+            </v-row>
+        </v-container>
+    </template>
+
+    <v-dialog v-model="dialog" persistent max-width="600px">
+        <v-card>
+            <v-card-title>
+                <span class="headline">{{nomtache}}</span>
+            </v-card-title>
+            <v-card-text>
+                <v-container>
+                    <v-row>
+                        <v-col>
+                            <v-text-field label="Description de la tache" v-model="desctache"></v-text-field>
+                        </v-col>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="12" sm="6">
+                            <v-text-field label="Date de départ*" required v-model="date1tache"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <v-text-field label="À faire avant le*" required v-model="date2tache"></v-text-field>
+                        </v-col>
+                    </v-row>
+                </v-container>
+            </v-card-text>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="reset">Fermer</v-btn>
+            <v-btn color="blue darken-1" text @click="newtask">Sauvegarder</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+    <template>
+        <div class="text-center ma-2">
+            <v-snackbar
+                    v-model="ajout"
+            >
+                {{ text }}
+                <v-btn
+                        color="red"
+                        text
+                        @click="ajout = false"
+                >
+                   Fermer
+                </v-btn>
+            </v-snackbar>
+        </div>
+    </template>
+
+
+        <template>
+            <div>
+                <v-data-table :headers="headers" :items="todos" class="elevation-1">
+                    <template v-slot:item.done="{ item }">
+                        <v-switch v-model="item.done" color="success"></v-switch>
+                    </template>
+
+                    <template v-slot:item.suppr="{ asuppr }">
+                        <v-icon small class="mr-2" @click="suppr(asuppr)">
+                            mdi-delete
+                        </v-icon>
+                    </template>
+
+                    <template v-slot:item.prop="{ prop }">
+                        <v-avatar :color="importance(prop)" size="18">
+                            <span class="white--text headline"></span>
+                        </v-avatar>
+                    </template>
+                </v-data-table>
+            </div>
+        </template>
+
+    </v-app>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script>
+    let vm =new Vue({
+        el: '#app',
+        vuetify: new Vuetify(),
+        data :{
+            dialog: false,
+            nomtache:'',
+            desctache:'',
+            date1tache:'',
+            date2tache:'',
+            ajout:false,
+            text: 'Tache bien ajoutée',
+            headers: [
+                {
+                    text: 'À faire',
+                    align: 'start',
+                    sortable: false,
+                    value: 'name',
+                },
+                { text: 'Priorité', value: 'prop' },
+                { text: 'Description', value: 'desc' },
+                { text: 'A faire depuis', value: 'dateCrea' },
+                { text: 'Jusqu\'a', value: 'dateFin' },
+                { text: 'Finie', value: 'done' },
+                { text: '', value: 'suppr' },
+
+            ],
+            todos: [
+                {
+                    name: 'Créer nouvelle tâche',
+                    desc: "essayer d'ajouter une tache",
+                    dateCrea: 16,
+                    dateFin: 17,
+                    done:true,
+                    prop:1,
+                },
+            ],
+        },
+
+        methods:{
+            creertache(){
+                this.dialog=true
+            },
+            reset:function(){
+                this.dialog= false;
+                this.nomtache='';
+                this.desctache='';
+                this.date1tache='';
+                this.date2tache='';
+            },
+            newtask:function(){
+                this.todos.push({
+                    name: this.nomtache,
+                    desc: this.desctache,
+                    dateCrea: this.date1tache,
+                    dateFin: this.date2tache,
+                    done:false,
+                    prop:1,
+                })
+                this.ajout=true;
+                this.reset();
+            },
+
+            suppr(item){
+                const index = this.todos.indexOf(item)
+                console.log(index)
+
+                this.todos.splice(index, 1)
+            },
+
+            importance(e){
+                let color=''
+                console.log(e)
+                const i = this.todos.indexOf(e)
+                if(i===1){
+                    console.log("je dois etre rouge")
+                    color="red"
+                }
+                else if (i===2){
+                    color="green"
+                }
+                else
+                    color="red"
+                //console.log(color)
+                return color
+
+            }
+
+        },
+
+
+
+    })
+</script>
+</body>
+</html>
